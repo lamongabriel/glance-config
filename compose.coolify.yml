@@ -4,14 +4,14 @@
 # Coolify injects SERVICE_URL_GLANCE_8080 (the generated FQDN) and manages the
 # Traefik reverse proxy, TLS and the domain for you.
 #
-# The config lives in ./config/glance.yml (mounted read-only). Edit it and
-# redeploy — Glance also auto-reloads the file on change while running.
-#
+# The config is baked into the image via the Dockerfile (COPY from the repo).
+# To apply config changes, push to the repo and redeploy in Coolify.
 # Set the GLANCE_* / GITHUB_TOKEN values in Coolify's "Environment Variables".
 
 services:
   glance:
-    image: glanceapp/glance:latest
+    build:
+      context: .
     restart: unless-stopped
     environment:
       # Coolify auto-generates this from the resource's domain.
@@ -21,10 +21,6 @@ services:
       - GLANCE_WEATHER_LOCATION=${GLANCE_WEATHER_LOCATION:-London, United Kingdom}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
     volumes:
-      - type: bind
-        source: ./config
-        target: /app/config
-        read_only: true
       # Self-hosted assets (logos, icons) served under /assets/.
       # Must match `assets-path: /app/assets` in glance.yml.
       - glance-assets:/app/assets
