@@ -1,0 +1,42 @@
+# Coolify deployment for Glance.
+#
+# In Coolify: create a "Docker Compose" resource and paste/point to this file.
+# Coolify injects SERVICE_URL_GLANCE_8080 (the generated FQDN) and manages the
+# Traefik reverse proxy, TLS and the domain for you.
+#
+# The config lives in ./config/glance.yml (mounted read-only). Edit it and
+# redeploy — Glance also auto-reloads the file on change while running.
+#
+# Set the GLANCE_* / GITHUB_TOKEN values in Coolify's "Environment Variables".
+
+services:
+  glance:
+    image: glanceapp/glance:latest
+    restart: unless-stopped
+    environment:
+      # Coolify auto-generates this from the resource's domain.
+      - SERVICE_URL_GLANCE_8080
+      # Customizable values referenced inside config/glance.yml.
+      - GLANCE_APP_NAME=${GLANCE_APP_NAME:-Glance}
+      - GLANCE_WEATHER_LOCATION=${GLANCE_WEATHER_LOCATION:-London, United Kingdom}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    volumes:
+      # Mount the config file read-only so the container can't modify it.
+      - type: bind
+        source: ./config/glance.yml
+        target: /app/config/glance.yml
+        read_only: true
+      # Self-hosted assets (logos, icons) served under /assets/.
+      # Must match `assets-path: /app/assets` in glance.yml.
+      - glance-assets:/app/assets
+    healthcheck:
+      # The image is distroless (no shell/wget), so use Glance's built-in
+      # healthcheck command, which pings /api/healthz.
+      test: ["CMD", "/app/glance", "healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  glance-assets:

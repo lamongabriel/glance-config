@@ -1,0 +1,8 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  // Discover the Glance authoring skills stored under .agents/skills.
+  // Paths are relative to the project root.
+  "skills": {
+    "paths": ["./.agents/skills"]
+  }
+}

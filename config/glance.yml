@@ -1,0 +1,85 @@
+# Glance dashboard configuration.
+# Docs: https://github.com/glanceapp/glance/blob/main/docs/configuration.md
+# Values wrapped in ${...} are pulled from environment variables so this file
+# can be committed without secrets. Provide them via the compose file / Coolify.
+
+server:
+  # Behind Coolify's proxy (Traefik), so trust X-Forwarded-* headers.
+  proxied: true
+  # Self-hosted icons/logos live here; mount an assets volume to /app/assets.
+  assets-path: /app/assets
+
+branding:
+  app-name: ${GLANCE_APP_NAME}
+
+theme:
+  # Feel free to tweak. Colors are HSL: "hue saturation lightness".
+  primary-color: 43 50 70
+  presets:
+    default-dark:
+      background-color: 240 8 9
+      primary-color: 43 50 70
+      negative-color: 0 70 70
+    catppuccin-mocha:
+      background-color: 240 21 15
+      primary-color: 267 84 81
+      positive-color: 115 54 76
+      negative-color: 343 81 75
+
+pages:
+  - name: Home
+    columns:
+      - size: small
+        widgets:
+          - type: calendar
+            first-day-of-week: monday
+
+          - type: weather
+            location: ${GLANCE_WEATHER_LOCATION}
+            units: metric
+            hour-format: 24h
+
+      - size: full
+        widgets:
+          - type: search
+            autofocus: true
+            search-engine: duckduckgo
+            bangs:
+              - title: YouTube
+                shortcut: "!yt"
+                url: https://www.youtube.com/results?search_query={QUERY}
+              - title: GitHub
+                shortcut: "!gh"
+                url: https://github.com/search?q={QUERY}
+
+          - type: hacker-news
+            limit: 15
+            collapse-after: 5
+
+          - type: releases
+            title: Releases
+            show-source-icon: true
+            token: ${GITHUB_TOKEN}
+            repositories:
+              - glanceapp/glance
+
+      - size: small
+        widgets:
+          - type: clock
+            hour-format: 24h
+            timezones:
+              - timezone: America/Sao_Paulo
+                label: São Paulo
+              - timezone: Europe/London
+                label: London
+              - timezone: America/New_York
+                label: New York
+
+          - type: bookmarks
+            groups:
+              - title: General
+                links:
+                  - title: GitHub
+                    url: https://github.com/
+                  - title: Glance Docs
+                    url: https://github.com/glanceapp/glance

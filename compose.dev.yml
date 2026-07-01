@@ -1,0 +1,32 @@
+# Local development for Glance with hot reload.
+#
+#   docker compose -f compose.dev.yml up
+#   -> open http://localhost:8080
+#
+# Glance watches its config file and reloads automatically on save, so editing
+# config/glance.yml (or any $include-d file) applies without restarting.
+# Changing environment variables still requires a restart (see docs).
+#
+# Put your local values in a .env file next to this compose file, e.g.:
+#   GLANCE_APP_NAME=Glance (dev)
+#   GLANCE_WEATHER_LOCATION=London, United Kingdom
+#   GITHUB_TOKEN=ghp_xxx
+
+services:
+  glance:
+    image: glanceapp/glance:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      # Fallback defaults if not provided via .env.
+      - GLANCE_APP_NAME=${GLANCE_APP_NAME:-Glance (dev)}
+      - GLANCE_WEATHER_LOCATION=${GLANCE_WEATHER_LOCATION:-London, United Kingdom}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+    volumes:
+      # Mount the whole config dir read-write so hot reload + $include work.
+      - ./config:/app/config
+      # Local assets served under /assets/ (matches assets-path in glance.yml).
+      - ./assets:/app/assets
