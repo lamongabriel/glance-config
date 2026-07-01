@@ -21,10 +21,9 @@ services:
       - GLANCE_WEATHER_LOCATION=${GLANCE_WEATHER_LOCATION:-London, United Kingdom}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
     volumes:
-      # Mount the config file read-only so the container can't modify it.
       - type: bind
-        source: ./config/glance.yml
-        target: /app/config/glance.yml
+        source: ./config
+        target: /app/config
         read_only: true
       # Self-hosted assets (logos, icons) served under /assets/.
       # Must match `assets-path: /app/assets` in glance.yml.
